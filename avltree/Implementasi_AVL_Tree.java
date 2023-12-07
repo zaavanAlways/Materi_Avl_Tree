@@ -1,5 +1,9 @@
 package avltree;
 
+import org.omg.CORBA.Any;
+
+import javafx.scene.Node;
+
 class AvlNode<AnyType> {
     AnyType element;
     AvlNode<AnyType> left;
@@ -163,6 +167,92 @@ class AvlTree<AnyType extends Comparable<? super AnyType>> {
             postOrder(root);
         }
     }
+    private AvlNode<AnyType> balance (AvlNode<AnyType> t){
+        if (t == null){
+            return null;
+        }
+        if(height(t.left) - height(t.right) > 1){ //tree LH
+            if(height(t.left.left) >= height(t.left.right)){ // left subString LH
+                t = case1(t);
+            }else{ // Left subtree  RH
+                t = case2(t);
+            }
+        }else if(height(t.right) - height(t.left) >1 ){ //tree RH
+            if(height(t.right.right) >= height(t.right.left)){ // right subtree RH
+                t = case4(t);
+            }else{ // right subtree LH
+                t = case3(t);
+            }
+        }
+        t.height = max(height(t.left), height(t.right) + 1);
+        return t;
+    }
+
+    //delete succesor : kanan terkecil
+    private AvlNode<AnyType> findMinimum (AvlNode<AnyType> t){
+        if(t == null){
+            return null;
+        }
+        while (t.left != null) {
+            t = t.left;
+        }
+        return t;
+    }
+
+    private AvlNode<AnyType> delete_succesor(AvlNode<AnyType> t, AnyType x){
+        if(t == null){
+            return null;
+        }
+        if(x.compareTo(t.element) < 0){ // x < element
+            t.left = delete_succesor(t.left, x);
+        }else if(x.compareTo(t.element) > 0){ // x > element
+            t.right = delete_succesor(t.right, x);
+        }else if(t.left != null && t.right != null){ //mempunyai 2 anak
+            t.element = findMinimum(t.right).element;
+            t.left = delete_succesor(t.right, t.element);
+        }else{ // mempunyai 1 anak
+            t = t.left !=null ? t.left : t.right;
+        }
+        return balance(t);
+    }
+    
+    public  void delete_succesor(AnyType x){
+        root = delete_succesor(root, x);
+    }
+
+    //delete_predecessor 
+    private AvlNode<AnyType> findMax(AvlNode<AnyType> t){
+        while (t.right != null) {
+            t = t.right;
+        }
+        return t;
+    }
+
+    private AvlNode<AnyType> deleteMax(AvlNode<AnyType> t){
+        if(t == null){
+            return null;
+        }else if(t.right != null){
+            t.right = deleteMax(t.right);
+            return t;
+        }else{
+            return t.left;
+        }
+    }
+    public AvlNode<AnyType> delete_predecessor(AvlNode<AnyType> t, AnyType x){
+        if(t == null){
+            return null;
+        }else{
+            if(x.compareTo(t.element) < 0){
+                t.left = delete_predecessor(t.left, x);
+            }else if(x.compareTo(t.element) > 0){
+                t.right = delete_predecessor(t.right, x);
+            }else if(t.left != null && t.right != null){
+                t.height = findMax(t.left).height;
+            }
+        }
+        return t;
+    }
+    
 }
 
 public class Implementasi_AVL_Tree {
@@ -187,20 +277,38 @@ public class Implementasi_AVL_Tree {
 
         System.out.println("Insert : 10, 85, 15, 70, 20, 60, 30, 50, 65, 80, 90, 40, 5, 55");
         System.out.println();
-        System.out.println("-----------InOrder----------- : ");
+        System.out.println("-----------------------InOrder---------------------");
         avl.inOrder();
         System.out.println();
         System.out.println();
 
-        System.out.println("---------PreOrder------------ : ");
+        System.out.println("-----------------------PreOrder------------------------");
         avl.preOrder();
         System.out.println();
 
         System.out.println();
 
-        System.out.println("--------PostOrder---------- : ");
+        System.out.println("----------------------PostOrder------------------------");
+        avl.postOrder();
+        System.out.println();
+
+        System.out.println();
+        System.out.println("[--------------------Setelah delete 60-----------------]");
+        avl.delete_succesor(60);
+
+        System.out.println();
+        System.out.println("---------------------Inorder----------------------------");
+        avl.inOrder();
+        System.out.println();
+        System.out.println();
+        
+        System.out.println("--------------------Preorder--------------------------------");
+        avl.preOrder();
+        System.out.println();
+        System.out.println();
+
+        System.out.println("--------------------post-------------------------------------");
         avl.postOrder();
 
     }
-
 }
